@@ -1,10 +1,11 @@
 package ru.clevertec.clevertechwvideohosting.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.clevertec.clevertechwvideohosting.dto.user.UserDto;
+import ru.clevertec.clevertechwvideohosting.dto.user.CreateUserDto;
+import ru.clevertec.clevertechwvideohosting.dto.user.UserPartialUpdateDto;
 import ru.clevertec.clevertechwvideohosting.dto.user.UserResponse;
 import ru.clevertec.clevertechwvideohosting.service.UserService;
 
@@ -18,36 +19,36 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody UserDto userDto) {
-        UserResponse userResponse = userService.createUser(userDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse createUser(@Valid @RequestBody CreateUserDto createUserDto) {
+        return userService.createUser(createUserDto);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getUsers() {
-        List<UserResponse> userResponses = userService.getAllUsers();
-        return ResponseEntity.ok(userResponses);
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponse> getUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserInformation(@PathVariable Long id) {
-        UserResponse userResponse = userService.getUserInformation(id);
-        return ResponseEntity.ok(userResponse);
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse getUserInformation(@PathVariable Long id) {
+        return userService.getUserInformation(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse updateUser(
             @PathVariable Long id,
-            @RequestBody UserDto updateUser) {
-        UserResponse updatedUserResponse = userService.updateUser(id, updateUser);
-        return ResponseEntity.ok(updatedUserResponse);
+            @Valid @RequestBody CreateUserDto updateUser) {
+        return userService.updateUser(id, updateUser);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponse> partialUpdateUser(
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse partialUpdateUser(
             @PathVariable Long id,
-            @RequestBody UserDto updateUser) {
-        UserResponse updatedUserResponse = userService.partialUpdateUser(id, updateUser);
-        return ResponseEntity.ok(updatedUserResponse);
+            @RequestBody UserPartialUpdateDto userPartialUpdateDto) {
+        return userService.partialUpdateUser(id, userPartialUpdateDto);
     }
 }

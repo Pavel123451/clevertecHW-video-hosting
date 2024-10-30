@@ -5,14 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChannelShortSummaryDto {
-    private String name;
-    private Long subscribersCount;
-    private String language;
-    private String avatar;
-    private Long categoryId;
+public class ChannelsPaginatedDto {
+    private List<ChannelShortSummaryDto> channelShortSummaries;
+    private int totalElements;
+    private int totalPages;
+
 }

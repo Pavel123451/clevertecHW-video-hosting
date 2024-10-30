@@ -1,16 +1,11 @@
 package ru.clevertec.clevertechwvideohosting.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelCreateDto;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelResponse;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelSummaryDto;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelUpdateDto;
+import ru.clevertec.clevertechwvideohosting.dto.channel.*;
 import ru.clevertec.clevertechwvideohosting.service.ChannelService;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/channels")
@@ -19,56 +14,55 @@ public class ChannelController {
     private final ChannelService channelService;
 
     @PostMapping
-    public ResponseEntity<ChannelResponse> createChannel(@RequestBody ChannelCreateDto channelCreateDto) {
-        ChannelResponse channelResponse = channelService.createChannel(channelCreateDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(channelResponse);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ChannelResponse createChannel(@Valid @RequestBody ChannelCreateDto channelCreateDto) {
+        return channelService.createChannel(channelCreateDto);
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getChannels(
+    @ResponseStatus(HttpStatus.OK)
+    public ChannelsPaginatedDto getChannels(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String language,
-            @RequestParam(required = false) Long categoryId) {
+            ChannelsDto channelsDto) {
 
-        Map<String, Object> response = channelService.getChannels(page, size,
-                title, language, categoryId);
-        return ResponseEntity.ok(response);
+        return channelService.getChannels(page, size, channelsDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ChannelResponse> updateChannel(@PathVariable Long id,
-                                                         @RequestBody ChannelUpdateDto channelUpdateDto) {
-        ChannelResponse updatedChannel = channelService.updateChannel(id, channelUpdateDto);
-        return ResponseEntity.ok(updatedChannel);
+    @ResponseStatus(HttpStatus.OK)
+    public ChannelResponse updateChannel(@PathVariable Long id,
+                                                         @Valid @RequestBody ChannelUpdateDto channelUpdateDto) {
+        return channelService.updateChannel(id, channelUpdateDto);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ChannelResponse> partialUpdateChannel(
+    @ResponseStatus(HttpStatus.OK)
+    public ChannelResponse partialUpdateChannel(
             @PathVariable Long id,
-            @RequestBody ChannelUpdateDto updateChannel) {
-        ChannelResponse updatedChannel = channelService.partialUpdateChannel(id, updateChannel);
-        return ResponseEntity.ok(updatedChannel);
+            @RequestBody ChannelPartialUpdateDto updateChannel) {
+        return channelService.partialUpdateChannel(id, updateChannel);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChannelSummaryDto> getChannelDetails(@PathVariable Long id) {
-        ChannelSummaryDto channelDetails = channelService.getChannelDetails(id);
-        return ResponseEntity.ok(channelDetails);
+    @ResponseStatus(HttpStatus.OK)
+    public ChannelSummaryDto getChannelDetails(@PathVariable Long id) {
+        return channelService.getChannelDetails(id);
     }
 
-    @PostMapping("/{id}/subscriptions")
-    public ResponseEntity<String> subscribeToChannel(@PathVariable Long id,
-                                                     @RequestParam Long userId) {
-        channelService.subscribeUserToChannel(userId, id);
-        return ResponseEntity.ok("Successfully subscribed to the channel");
+    @PostMapping("/{channelId}/subscribers/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public String subscribeToChannel(@PathVariable Long channelId,
+                                                     @PathVariable Long userId) {
+        channelService.subscribeUserToChannel(userId, channelId);
+        return "Successfully subscribed to the channel";
     }
 
-    @DeleteMapping("/{id}/subscriptions")
-    public ResponseEntity<String> unsubscribeFromChannel(@PathVariable Long id,
-                                                         @RequestParam Long userId) {
-        channelService.unsubscribeFromChannel(id, userId);
-        return ResponseEntity.ok("Successfully unsubscribed from the channel");
+    @DeleteMapping("/{channelId}/subscribers/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public String unsubscribeFromChannel(@PathVariable Long channelId,
+                                                         @PathVariable Long userId) {
+        channelService.unsubscribeFromChannel(channelId, userId);
+        return"Successfully unsubscribed from the channel";
     }
 }

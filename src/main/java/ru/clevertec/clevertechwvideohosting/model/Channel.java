@@ -31,11 +31,11 @@ public class Channel {
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category categoryId;
+    private Category category;
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
-    private User authorId;
+    private User author;
 
     @ManyToMany(mappedBy = "subscribedChannels", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<User> subscribers;

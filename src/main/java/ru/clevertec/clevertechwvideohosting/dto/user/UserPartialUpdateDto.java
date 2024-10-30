@@ -1,13 +1,15 @@
 package ru.clevertec.clevertechwvideohosting.dto.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@RequiredArgsConstructor
-@Setter
 @Getter
-public class UserDto {
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserPartialUpdateDto {
     private String name;
     private String nickname;
     private String email;

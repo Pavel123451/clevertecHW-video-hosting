@@ -1,17 +1,15 @@
 package ru.clevertec.clevertechwvideohosting.dto.channel;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@Getter
+@RequiredArgsConstructor
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChannelShortSummaryDto {
+@Getter
+public class ChannelPartialUpdateDto {
     private String name;
-    private Long subscribersCount;
+    private String description;
     private String language;
     private String avatar;
     private Long categoryId;

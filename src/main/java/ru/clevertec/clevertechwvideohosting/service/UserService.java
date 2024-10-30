@@ -3,16 +3,12 @@ package ru.clevertec.clevertechwvideohosting.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.clevertec.clevertechwvideohosting.dto.user.UserDto;
+import ru.clevertec.clevertechwvideohosting.dto.user.CreateUserDto;
+import ru.clevertec.clevertechwvideohosting.dto.user.UserPartialUpdateDto;
 import ru.clevertec.clevertechwvideohosting.dto.user.UserResponse;
-import ru.clevertec.clevertechwvideohosting.handler.user.UserUpdateHandler;
-import ru.clevertec.clevertechwvideohosting.handler.user.impl.EmailUpdateHandler;
-import ru.clevertec.clevertechwvideohosting.handler.user.impl.UserNameUpdateHandler;
-import ru.clevertec.clevertechwvideohosting.handler.user.impl.NicknameUpdateHandler;
 import ru.clevertec.clevertechwvideohosting.mapper.UserMapper;
 import ru.clevertec.clevertechwvideohosting.model.User;
 import ru.clevertec.clevertechwvideohosting.repository.UserRepository;
-import ru.clevertec.clevertechwvideohosting.util.UserUtil;
 
 import java.util.List;
 
@@ -22,12 +18,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserResponse createUser(UserDto userDto) {
-        if (UserUtil.userDtoIsBlank(userDto)) {
-            throw new IllegalArgumentException("User fields are blank");
-        }
+    public UserResponse createUser(CreateUserDto createUserDto) {
 
-        User user = userMapper.toUser(userDto);
+        User user = userMapper.toUser(createUserDto);
 
         if (userRepository.findByNickname(user.getNickname()).isPresent()) {
             throw new IllegalArgumentException("User with this nickname already exists");
@@ -54,31 +47,20 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse updateUser(Long id, UserDto updateUser) {
+    public UserResponse updateUser(Long id, CreateUserDto updateUserDto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with this id not found"));
 
-        if (UserUtil.userDtoIsBlank(updateUser)) {
-            throw new IllegalArgumentException("User fields are blank");
-        }
-        user.setNickname(updateUser.getNickname());
-        user.setEmail(updateUser.getEmail());
-        user.setName(updateUser.getName());
+        userMapper.updateUserFromDto(updateUserDto, user);
         User updatedUser = userRepository.save(user);
         return userMapper.toUserResponse(updatedUser);
     }
 
-    public UserResponse partialUpdateUser(Long id, UserDto updateUser) {
+    public UserResponse partialUpdateUser(Long id, UserPartialUpdateDto userPartialUpdateDto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with this id not found"));
 
-        List<UserUpdateHandler> handlers = List.of(
-                new UserNameUpdateHandler(),
-                new NicknameUpdateHandler(userRepository),
-                new EmailUpdateHandler(userRepository)
-        );
-
-        handlers.forEach(handler -> handler.handle(user, updateUser));
+        userMapper.partialUpdateUpdateFromDto(userPartialUpdateDto, user);
 
         User updatedUser = userRepository.save(user);
         return userMapper.toUserResponse(updatedUser);

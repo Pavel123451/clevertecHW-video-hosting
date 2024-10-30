@@ -1,51 +1,45 @@
 package ru.clevertec.clevertechwvideohosting.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelCreateDto;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelResponse;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelShortSummaryDto;
-import ru.clevertec.clevertechwvideohosting.dto.channel.ChannelSummaryDto;
-import ru.clevertec.clevertechwvideohosting.model.Category;
+import org.mapstruct.*;
+import org.springframework.data.domain.Page;
+import ru.clevertec.clevertechwvideohosting.dto.channel.*;
 import ru.clevertec.clevertechwvideohosting.model.Channel;
-import ru.clevertec.clevertechwvideohosting.model.User;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+import java.util.List;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ChannelMapper {
+    @Mapping(target = "author.id", source = "authorId")
+    @Mapping(target = "category.id", source = "categoryId")
     Channel toChannel(ChannelCreateDto channelCreateDto);
 
+    @Mapping(target = "authorId", source = "author.id")
+    @Mapping(target = "categoryId", source = "category.id")
     ChannelResponse toChannelResponse(Channel channel);
 
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "subscribersCount", expression = "java(getSubscriberCount(channel))")
     ChannelShortSummaryDto toChannelShortSummaryDto(Channel channel);
 
-    @Mapping(target = "authorName", source = "authorId.name")
-    @Mapping(target = "categoryId", source = "categoryId.id")
+    @Mapping(target = "authorName", source = "author.name")
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "subscribersCount", expression = "java(getSubscriberCount(channel))")
     ChannelSummaryDto toChannelSummaryDto(Channel channel);
 
-    default Category mapIdToCategory(Long categoryId) {
-        if (categoryId == null) {
-            return null;
-        }
-        Category category = new Category();
-        category.setId(categoryId);
-        return category;
-    }
+    @Mapping(target = "totalElements", source = "channelPage.totalElements")
+    @Mapping(target = "totalPages", source = "channelPage.totalPages")
+    ChannelsPaginatedDto toChannelsPaginatedDto(List<ChannelShortSummaryDto> channelShortSummaries,
+                                                Page<Channel> channelPage);
 
-    default User mapIdToAuthor(Long authorId) {
-        if (authorId == null) {
-            return null;
-        }
-        User user = new User();
-        user.setId(authorId);
-        return user;
-    }
+    @Mapping(target = "category.id", source = "categoryId")
+    void updateChannelFromDto(ChannelUpdateDto channelUpdateDto, @MappingTarget Channel channel);
 
-    default Long mapCategoryToId(Category category) {
-        return category == null ? null : category.getId();
-    }
+    @Mapping(target = "category.id", source = "categoryId")
+    void partialUpdateChannelFromDto(ChannelPartialUpdateDto dto, @MappingTarget Channel channel);
 
-    default Long mapCategoryToId(User author) {
-        return author == null ? null : author.getId();
+    default Long getSubscriberCount(Channel channel) {
+        return channel.getSubscribers() != null ?
+                (long) channel.getSubscribers().size() : 0;
     }
 }
